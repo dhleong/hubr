@@ -1,0 +1,112 @@
+#!/bin/bash
+
+#
+# const
+#
+
+LABEL_ACCEPTED='2 - Accepted'
+
+#
+# imports
+#
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+source ${DIR}/gh-api
+
+if [ -z $REPO_NAME ] || [ -z $ME_SLUG ]
+then
+    echo "You must define REPO_NAME and ME_SLUG in ${HOME}/.hubrrc"
+    exit
+fi
+
+# global defines
+REPO="repos/${REPO_NAME}"
+SCRIPT=$0
+
+#
+# methods
+#
+
+assign() {
+    issue=$1
+    slug=$2
+
+    if [ z = z"$issue" ] || [ z = z"$slug" ]
+    then
+        echo "usage: ${SCRIPT} assign <issue-number> <user-slug>"
+        exit
+    fi
+
+    gh_patch "${REPO}/issues/${issue}" '{"assignee":"'$slug'"}'
+}
+
+tag() {
+    issue=$1
+    tag=$2
+
+    if [ -z "$issue" ] || [ -z "$tag" ]
+    then
+        echo "usage: ${SCRIPT} tag <issue-number> <tag-name>"
+        exit
+    fi
+
+    gh_post "${REPO}/issues/${issue}/labels" "[\"${tag}\"]"
+}
+
+untag() {
+    issue=$1
+    tag=$2
+
+    if [ -z "$issue" ] || [ -z "$tag" ]
+    then
+        echo "usage: ${SCRIPT} untag <issue-number> <tag-name>"
+        exit
+    fi
+
+    gh_delete "${REPO}/issues/${issue}/labels/${tag}"
+}
+
+#
+# main
+#
+
+print_usage() {
+    echo "usage: ${SCRIPT} {assign|accept|tag|take|untag} ..."
+}
+
+if [ $# -lt 1 ]
+then
+    print_usage
+    exit
+fi
+
+CMD=$1
+
+case $CMD in
+assign)
+    assign $2 $3
+    ;;
+accept)
+    tag $2 "${LABEL_ACCEPTED}"
+    ;;
+tag)
+    tag $2 "$3"
+    ;;
+take)
+    assign $2 ${ME_SLUG}
+    ;;
+untag)
+    untag $2 "$3"
+    ;;
+*)
+    print_usage
+    ;;
+esac
+

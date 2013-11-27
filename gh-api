@@ -1,0 +1,83 @@
+#!/bin/bash
+
+BASE="https://api.github.com"
+
+#
+# source config file
+#
+
+CONFIG=${HOME}/.hubrrc
+
+if ! [ -f ${CONFIG} ] 
+then
+    echo "Please setup config file at ${CONFIG}"
+    exit
+fi
+
+source ${CONFIG}
+if [ z$TOKEN = z ]
+then
+    echo "Please define TOKEN in ${CONFIG}"
+    exit
+fi
+
+#
+# Source-able util methods
+#
+
+gh_get() {
+    # basic API GET method
+    # @param FRAGMENT the path, appended to ${BASE}/
+
+    FRAGMENT=$1
+
+    curl -H "Authorization: token ${TOKEN}" "${BASE}/${FRAGMENT}" 2> /dev/null
+}
+
+gh_send() {
+
+    # basic API POST/PUT/PATCH with data
+    # @param FRAGMENT the path, appended to ${BASE}/
+
+    METHOD=$(echo "$1" | tr '[:lower:]' '[:upper:]')
+    FRAGMENT=$(echo "$2" | tr ' ' '+')
+    BODY=$3
+
+    curl -H "Authorization: token ${TOKEN}" -X $METHOD -d"${BODY}" "${BASE}/${FRAGMENT}" #2> /dev/null
+}
+
+gh_patch() {
+    gh_send PATCH "${1}" "${2}"
+}
+
+gh_post() {
+    gh_send POST "${1}" "${2}"
+}
+
+gh_delete() {
+    BODY="$1"
+    if [ -z "$BODY" ]
+    then
+        BODY="-"
+    fi
+
+    gh_send DELETE "${1}" "${BODY}"
+}
+
+# stop here if we're being sourced
+[[ "${BASH_SOURCE[0]}" != "${0}" ]] && return
+
+#
+# standalone usage
+#
+
+METHOD=$(echo "$1" | tr '[:upper:]' '[:lower:]')
+FRAGMENT=$2
+BODY=$3
+
+if [ $METHOD = 'get' ]
+then
+    gh_get "$FRAGMENT"
+else
+    gh_send $METHOD "${FRAGMENT}" "${BODY}"
+fi

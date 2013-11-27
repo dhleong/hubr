@@ -1,0 +1,85 @@
+#!/bin/bash
+
+REPO_NAME="Miners/minus-for-Android"
+REPO="repos/${REPO_NAME}"
+
+# issues config
+MILESTONE="2.7"
+STATE=closed
+
+#
+# imports
+#
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+source ${DIR}/gh-api
+
+#
+# Methods
+#
+
+get_milestone() {
+    # get the number for a given milestone
+    #
+    # @param NAME name of the milestone
+    # @return -1 if not found, else the number
+    #
+
+    NAME=$1
+
+    AWK='BEGIN{milestone="-1"}'                           # initialize
+    AWK+='/number/{gsub(/[ ,:]/, "", $3); lastNumber=$3}' # number is always first; save it
+    AWK+='/"'${NAME}'"/{milestone=lastNumber; exit}'      # if the line matches "MILESTONE", save number
+    AWK+='END{print milestone}'                           # print the number
+
+    # fetch, and feed to our nice script
+    gh_get "${REPO}/milestones" | awk -F\" "$AWK" 
+}
+
+get_issues() {
+    # get json of issues for a given milestone and state
+    #
+    # @param MILENUM milestone number; can be fetched via get_milestone()
+    # @param STATE "open" or "closed"
+    #
+
+    MILENUM=$1
+    STATE=$2
+
+    gh_get "${REPO}/issues?state=${STATE}&milestone=${MILENUM}"
+}
+
+#
+# Script
+#
+
+if [ $# -ge 1 ]
+then
+    MILESTONE=$1
+fi
+
+# fetch the milestone
+echo "Fetching milestone '${MILESTONE}'..."
+mileNum=$(get_milestone ${MILESTONE})
+
+if [ $mileNum -eq -1 ]
+then
+    echo "No such milestone \`\`${MILESTONE}''"
+    exit
+fi
+
+echo "done. Fetching ${STATE} issues..."
+echo ''
+
+get_issues $mileNum $STATE \
+    | grep title | grep -v "${MILESTONE}" \
+    | sed 's/.*"title": "\(.*\)",/\1/' \
+    | sed 's/\\"/"/g'
+
