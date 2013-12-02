@@ -62,6 +62,10 @@ get_issues() {
     gh_get "${REPO}/issues?state=${STATE}&milestone=${MILENUM}${sinceParam}"
 }
 
+_debug() {
+    echo "$@" 1>&2
+}
+
 #
 # Script
 #
@@ -75,13 +79,13 @@ else
 fi
 
 # fetch the milestone
-echo "Fetching milestone '${MILESTONE}'..."
+_debug "Fetching milestone '${MILESTONE}'..."
 mileNum=$(get_milestone ${MILESTONE})
 
 if [ $mileNum -eq -1 ]
 then
-    echo "No such milestone \`\`${MILESTONE}''"
-    exit
+    _debug "No such milestone \`\`${MILESTONE}''"
+    exit 1
 fi
 
 sinceLabel=""
@@ -90,8 +94,8 @@ then
     sinceLabel=" since $SINCE"
 fi
 
-echo "done; Fetching ${STATE} issues${sinceLabel}..."
-echo ''
+_debug "done; Fetching ${STATE} issues${sinceLabel}..." 
+_debug ''
 
 AWK='/number/{gsub(/[ ,:]/, "", $3); lastNumber=$3}' # number is always first; save it
 AWK+='/title/{print lastNumber ": " $4}'      # if the line matches "MILESTONE", save number
