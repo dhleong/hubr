@@ -73,6 +73,9 @@ untag() {
     gh_delete "${REPO}/issues/${issue}/labels/${tag}"
 }
 
+# stop here if we're being sourced
+[[ "${BASH_SOURCE[0]}" != "${0}" ]] && return
+
 #
 # main
 #
