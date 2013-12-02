@@ -56,7 +56,6 @@ get_issues() {
     if [ z != z$SINCE ]
     then
         sinceParam="&since=$SINCE"
-        echo $sinceParam
     fi
 
     gh_get "${REPO}/issues?state=${STATE}&milestone=${MILENUM}${sinceParam}"
