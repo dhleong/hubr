@@ -97,7 +97,7 @@ _debug "done; Fetching ${STATE} issues${sinceLabel}..."
 _debug ''
 
 AWK='/number/{gsub(/[ ,:]/, "", $3); lastNumber=$3}' # number is always first; save it
-AWK+='/title/{print lastNumber ": " $4}'      # if the line matches "MILESTONE", save number
+AWK+='/title/{gsub(".*\"title\": \"",""); gsub("\",$", ""); print lastNumber ": " $0}' # clean up and print title with issue number
 
     #| sed 's/.*"title": "\(.*\)",/\1/' \
 get_issues $mileNum $STATE $SINCE \
