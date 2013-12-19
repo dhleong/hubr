@@ -115,7 +115,7 @@ AWK+='/title/{gsub(/^.*"title": "|",$/, ""); print lastNumber ": " $0}' # clean 
 
     #| sed 's/.*"title": "\(.*\)",/\1/' \
 get_issues "$mileNum" "$STATE" "$SINCE" "$LABELS"\
-    | grep -v "${MILESTONE}" \
     | awk -F\" "$AWK" \
+    | grep -v ": ${MILESTONE}$" \
     | sed 's/\\"/"/g'
 
