@@ -25,3 +25,10 @@ function! hubr#repo_name()
 
     return strpart(remote, start, end - start)
 endfunction
+
+function! hubr#_exec(cmd, args)
+    let path = expand("%:p")
+    let root = strpart(path, 0, stridx(path, 'autoload'))
+
+    return system(root . a:cmd . ' ' . a:args)
+endfunction
