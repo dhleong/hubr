@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # issues config
-MILESTONE="2.7.4"
+MILESTONE=""
 STATE=closed
 
 #
@@ -73,7 +73,9 @@ _debug() {
 }
 
 print_usage() {
-    echo "usage: github-issues-fetch -m <milestone-name> (-d <since_date>) (-l <labels>)"
+    echo "usage: github-issues-fetch -m <milestone-name> (-d <since_date>) (-l <labels>) (-r <repo_name>)"
+    echo "flags: -o OPEN tickets"
+    echo "       -c CLOSED tickets (default)"
     exit
 }
 
@@ -81,13 +83,17 @@ print_usage() {
 # Script
 #
 
-while getopts ":d:hl:m:" Option
+while getopts ":d:hl:m:r:co" Option
 do
   case $Option in
+  r) REPO="repos/$OPTARG";;
   d) SINCE="$OPTARG";;
   l) LABELS="$OPTARG";;
   m) MILESTONE="$OPTARG";;
   h) print_usage;;
+
+  c) STATE="closed";;
+  o) STATE="open";;
   esac
 done
 
