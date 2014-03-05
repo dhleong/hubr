@@ -44,6 +44,7 @@ let s:kind = {
 "  VIEW action  "
 """""""""""""""""
 let s:kind.action_table.view = {
+    \ 'description' : 'Open issue in browser',
     \ 'is_selectable': 0,
     \ }
 function! s:kind.action_table.view.func(candidate)
@@ -62,6 +63,7 @@ endfunction
 "  ANNOTATE-CLOSES action  "
 """"""""""""""""""""""""""""
 let s:kind.action_table.annotate_closes = {
+    \ 'description' : 'Insert "Closes #<num>" for selected issues',
     \ 'is_selectable': 1,
     \ }
 function! s:kind.action_table.annotate_closes.func(candidates)
@@ -72,6 +74,7 @@ endfunction
 "  ANNOTATE-REFS action  "
 """"""""""""""""""""""""""
 let s:kind.action_table.annotate_refs = {
+    \ 'description' : 'Insert "Refs #<num>" for selected issues',
     \ 'is_selectable': 1,
     \ }
 function! s:kind.action_table.annotate_refs.func(candidates)
