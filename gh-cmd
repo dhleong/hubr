@@ -20,9 +20,9 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source ${DIR}/gh-api
 
-if [ -z $REPO_NAME ] || [ -z $ME_SLUG ]
+if [ -z $REPO_NAME ] || [ -z $ME_LOGIN ]
 then
-    echo "You must define REPO_NAME and ME_SLUG in ${HOME}/.hubrrc"
+    echo "You must define REPO_NAME and ME_LOGIN in ${HOME}/.hubrrc"
     exit
 fi
 
@@ -103,7 +103,7 @@ tag)
     tag $2 "$3"
     ;;
 take)
-    assign $2 ${ME_SLUG}
+    assign $2 ${ME_LOGIN}
     ;;
 untag)
     untag $2 "$3"
