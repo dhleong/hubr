@@ -4,7 +4,9 @@ function! s:python(methodCall)
 
     let python_result = {}
     exe 'python hubr_to_vim("python_result", ' . fullCall . ')'
-    return python_result
+
+    " results are returned in the 'result' key
+    return python_result.result
 endfunction
 
 function! hubr#repo_path() 
@@ -56,8 +58,13 @@ function! hubr#get_user(...)
     if a:0 == 1
         echo s:python('get_user("' . a:1 . '")')
     else
-        echo  s:python('get_user()')
+        echo s:python('get_user()')
     endif
+endfunction
+
+" Low-level access to the python call
+function! hubr#_python(methodCall)
+    return s:python(a:methodCall)
 endfunction
 
 " ------------------------------------------------------------------------

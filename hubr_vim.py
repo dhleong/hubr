@@ -73,8 +73,7 @@ def _vimify(obj):
 
     elif type(obj) == list:
         l = vim.bindeval("[]")
-        for val in obj:
-            l.append(_vimify(val))
+        l.extend(map(_vimify, obj))
         return l
 
     elif type(obj) == unicode or type(obj) == str:

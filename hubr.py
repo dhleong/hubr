@@ -221,6 +221,53 @@ class Hubr(object):
     def get_issue(self, issue):
         return self._http.json(self._repo("issues/%s", issue))
 
+    def get_issues(self, state=None, tags=None, milestone=None, since=None):
+        """@todo: Docstring for get_issues.
+
+        :state: Either "closed" or "open"
+        :tags: List of tags to require
+        :milestone: Id or name of a milestone; if a String, we will 
+                    automatically query for the id
+        :since: A Date (FIXME: not implemented)
+        :returns: A list of issues, or None on error
+
+        """
+        params = {}
+        if state is not None:
+            params['state'] = state
+        if tags is not None:
+            params['labels'] = tags
+        if milestone is not None:
+            if type(milestone) != int:
+                params['milestone'] = self.get_milestone_number(milestone)
+            else:
+                params['milestone'] = milestone
+        if since is not None:
+            params['since'] = since
+
+        return self._http.json(self._repo("issues", params))
+
+    def get_milestones(self):
+        """Get milestones for the current repo"""
+        return self._http.json(self._repo("milestones"))
+
+    def get_milestone_number(self, name):
+        """Get the number of a milestone by its name
+
+        :name: @todo
+        :returns: @todo
+
+        """
+        milestones = self.get_milestones()
+        if milestones is None:
+            return None
+
+        for milestone in milestones:
+            if milestone['title'] == name:
+                return milestone['number']
+
+        return None
+
     def get_user(self, userLogin=None):
         """Fetch the given user, or active user
             if no userLogin is provided
@@ -263,7 +310,8 @@ class Hubr(object):
 
         :url: @todo
         :args: Will be interpolated into url, if provided,
-                and urlencoded
+                and urlencoded. Alternatively, if a single
+                dict is passed, it will be used as get params
         :returns: @todo
 
         """
@@ -272,9 +320,14 @@ class Hubr(object):
 
         if len(args):
             # format the args as strings, url-quoted
-            args = map(str, args)
-            args = map(quote_plus, args)
-            url = url % tuple(args)
+            if type(args[0]) == dict:
+                # get params
+                params = urlencode(args[0])
+                url = url + '?' + params
+            else:
+                args = map(str, args)
+                args = map(quote_plus, args)
+                url = url % tuple(args)
         
         return "repos/%s/%s" % (self._options['REPO_NAME'], url)
 
@@ -331,9 +384,10 @@ def main(argv):
     hubr = Hubr.from_config()
 
     # print JSON.dumps(hubr.get_issue(2256), indent=4)
-    result = hubr.tag(2256, "Not a bug")
-    print result.json()
-    print result.get_status()
+    print JSON.dumps(hubr.get_issues(state='open', milestone="2.10.0"), indent=4)
+    # result = hubr.tag(2256, "Not a bug")
+    # print result.json()
+    # print result.get_status()
 
 if __name__ == '__main__':
     import sys
