@@ -54,6 +54,7 @@ def hubr(repoPath):
     if __hubrs.has_key(repoPath):
         return __hubrs[repoPath]
 
+    # FIXME set repo name option
     newHubr = Hubr.from_config(repoPath + '.hubrrc')
     __hubrs[repoPath] = newHubr
     return newHubr
