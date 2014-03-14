@@ -9,6 +9,14 @@ function! s:python(methodCall)
     return python_result.result
 endfunction
 
+" Given an options dict, convert it into python kwargs calls
+function! s:kwargs(options)
+    return join(
+        \ map(items(a:options), 
+            \'v:val[0] . "=\"" . v:val[1] . "\""'), 
+        \ ', ')
+endfunction
+
 function! hubr#repo_path() 
 
     if !exists("*fugitive#repo")
@@ -52,6 +60,13 @@ function! hubr#_exec(cmd, args)
     let root = strpart(path, 0, stridx(path, 'autoload'))
 
     return system(root . a:cmd . ' ' . a:args)
+endfunction
+
+" Options is a dict whose keys match kwargs
+"  for the same method in the Python Hubr
+function! hubr#get_issues(options)
+    let args = s:kwargs(a:options)
+    return s:python('get_issues(' . args . ')')
 endfunction
 
 function! hubr#get_user(...)
