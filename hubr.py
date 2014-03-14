@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from os.path import expanduser
+from os.path import expanduser, isfile
 from urllib import urlencode, quote_plus
 import urllib2
 import json as JSON
@@ -297,6 +297,9 @@ class Hubr(object):
 
         options = {}
         for path in configFilePaths:
+            if not isfile(path):
+                continue
+
             with open(path) as fp:
                 for line in fp:
                     if line.startswith('#'):
@@ -335,3 +338,4 @@ def main(argv):
 if __name__ == '__main__':
     import sys
     main(sys.argv)
+

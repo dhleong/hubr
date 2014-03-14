@@ -1,4 +1,23 @@
+function! s:python(methodCall)
+    let repo_path = hubr#repo_path()
+    let fullCall = 'hubr("' . repo_path . '").' . a:methodCall
 
+    let python_result = {}
+    exe 'python hubr_to_vim("python_result", ' . fullCall . ')'
+    return python_result
+endfunction
+
+function! hubr#repo_path() 
+
+    if !exists("*fugitive#repo")
+        echo "Github view requires vim-fugitive plugin"
+        return 0
+    endif
+
+    let git_dir = fugitive#repo().git_dir
+    let end = stridx(git_dir, '/.git')
+    return strpart(git_dir, 0, end+1)
+endfunction
 
 function! hubr#repo_name() 
 
@@ -32,3 +51,19 @@ function! hubr#_exec(cmd, args)
 
     return system(root . a:cmd . ' ' . a:args)
 endfunction
+
+function! hubr#get_user(...)
+    if a:0 == 1
+        echo s:python('get_user("' . a:1 . '")')
+    else
+        echo  s:python('get_user()')
+    endif
+endfunction
+
+" ------------------------------------------------------------------------
+" Python initialization
+" ------------------------------------------------------------------------
+
+let s:repo_path = hubr#repo_path()
+let s:script_path = fnameescape(expand('<sfile>:p:h:h'))
+execute 'pyfile '.s:script_path.'/hubr_vim.py'
