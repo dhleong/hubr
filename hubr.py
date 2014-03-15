@@ -303,6 +303,16 @@ class Hubr(object):
         url = self._repo("issues/%s/labels/%s", issue, tagName)
         return self._http.delete(url)
 
+    def set_option(self, name, value):
+        """Manually set an option value
+
+        :name: Option name
+        :value: Option value (duh)
+        :returns: @todo
+
+        """
+        self._options[name] = value
+
     def _repo(self, url, *args):
         """Return an URL based on the REPO_NAME;
         if we don't have the REPO_NAME option defined,

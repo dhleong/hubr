@@ -103,10 +103,34 @@ function! hubr#get_user(...)
     endif
 endfunction
 
+" ------------------------------------------------------------------------
+" 'Private' methods
+" ------------------------------------------------------------------------
+
+" Get value of an option
+function! hubr#_opt(optName)
+    let globalName = 'g:hubr#' . a:optName
+    let localName = 'b:hubr#' . a:optName
+    if exists(localName)
+        return eval(localName)
+    elseif exists(globalName)
+        return eval(globalName)
+    else
+        return s:opt_defaults[a:optName]
+    endif
+endfunction
+
 " Low-level access to the python call
 function! hubr#_python(methodCall)
     return s:python(a:methodCall)
 endfunction
+
+" ------------------------------------------------------------------------
+" Options
+" ------------------------------------------------------------------------
+let s:opt_defaults = {
+    \ 'set_options_from_fugitive': 1
+\}
 
 " ------------------------------------------------------------------------
 " Python initialization

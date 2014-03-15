@@ -6,11 +6,11 @@ let s:unite_source = {
 function! s:unite_source.gather_candidates(args, context)
 
     " FIXME milestone? maybe as an arg? state?
-    let args = {
+    let issuesFilter = {
         \ 'state': 'open',
         \ 'milestone': '2.10.0'
         \ }
-    let issues = hubr#get_issues(args)
+    let issues = hubr#get_issues(issuesFilter)
 
     if type(issues) == type(0)
         " some kind of error

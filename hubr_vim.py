@@ -26,7 +26,6 @@ except ImportError:
 sys.path.pop(1)
 
 
-
 class PythonToVimStr(unicode):
     """ Vim has a different string implementation of single quotes.
     Borrowed from jedi-vim"""
@@ -49,13 +48,39 @@ class PythonToVimStr(unicode):
             s = self.encode('UTF-8')
         return '"%s"' % s.replace('\\', '\\\\').replace('"', r'\"')
 
+def vimcall(methodName, args=''):
+    """Call a vim hubr# method
+
+    :methodName: hurb# method to call
+    :args: String args
+    :returns: The results of the method call
+
+    """
+    # method = vim.bindeval('hubr#%s' % methodName)
+    return vim.eval('hubr#%s(%s)' % (methodName, args))
+
+def vimopt(optName):
+    """Get the value of a vim-defined option
+
+    :optName: Name of the option
+    :returns: The option value
+
+    """
+    return vimcall('_opt', '"%s"' % optName)
+
 __hubrs = {}
 def hubr(repoPath):
+    """Main vim interface; Gets the appropriate
+        Hubr instance for the repo path
+    """
     if __hubrs.has_key(repoPath):
         return __hubrs[repoPath]
 
-    # FIXME set repo name option
     newHubr = Hubr.from_config(repoPath + '.hubrrc')
+    if vimopt('set_options_from_fugitive'):
+        newHubr.set_option('REPO_NAME', vimcall('repo_name'))
+        newHubr.set_option('ME_LOGIN', vimcall('me_login'))
+
     __hubrs[repoPath] = newHubr
     return newHubr
 
@@ -86,6 +111,9 @@ def _vimify(obj):
     return obj
 
 def hubr_to_vim(bindName, result):
+    """Called from vim to copy the method result
+       back into vim-space
+    """
     if type(result) == HubrResult:
         result = {
             'status': result.get_status(),
