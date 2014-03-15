@@ -1,12 +1,12 @@
 # hubr
 
-Super simple github commandline tools, for fun and productivity (and maybe vim)
+Super simple github commandline tools, for fun, productivity, and Vim
 
 ## Setup
 Generate an oauth token from your GitHub account settings, then create a 
 `.hubrrc` in your home directory. The vim commands for hubr will also look 
 for a `.hubrrc` in the root directory of the current git repo, and any
-configs there will override the global one. See **Vim Utilities** below
+configs there will override the global one. See **Vim Usage** below
 
 Sample:
 
