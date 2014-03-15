@@ -17,10 +17,37 @@ function! s:kwargs(options)
         \ ', ')
 endfunction
 
-function! hubr#repo_path() 
+function! s:ensure_fugitive()
 
     if !exists("*fugitive#repo")
-        echo "Github view requires vim-fugitive plugin"
+        echoerr "hubr requires vim-fugitive plugin"
+        return 0
+    endif
+
+    return 1
+endfunction
+
+" Convenience to get the repo user's 'login' name
+"  (for conveniences like assigning a ticket to yourself)
+function! hubr#me_login()
+
+    if !s:ensure_fugitive()
+        return 0
+    endif
+
+    let fullUser = fugitive#repo().user()
+    let space = stridx(fullUser, ' ')
+    if space == -1
+        return fullUser
+    endif
+
+    return strpart(fullUser, 0, space)
+endfunction
+
+
+function! hubr#repo_path() 
+
+    if !s:ensure_fugitive()
         return 0
     endif
 
@@ -31,8 +58,7 @@ endfunction
 
 function! hubr#repo_name() 
 
-    if !exists("*fugitive#repo")
-        echo "Github view requires vim-fugitive plugin"
+    if !s:ensure_fugitive()
         return 0
     endif
 
