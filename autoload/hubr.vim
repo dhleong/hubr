@@ -120,6 +120,16 @@ function! hubr#_opt(optName)
     endif
 endfunction
 
+" Check if we have an option on the Python Hubr instance
+function! hubr#_has_pyopt(optName)
+    return s:python('has_option("' . a:optName . '")')
+endfunction
+
+" Get value of option on the Python Hubr instance
+function! hubr#_pyopt(optName)
+    return s:python('get_option("' . a:optName . '")')
+endfunction
+
 " Low-level access to the python call
 function! hubr#_python(methodCall)
     return s:python(a:methodCall)

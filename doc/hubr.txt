@@ -1,0 +1,59 @@
+*hubr.txt*	Super simple GitHub tools for fun, productivity, and Vim
+
+Version: 0.1
+Author : Daniel Leong <me@dhleong.net>
+License: MIT license  {{{
+    Permission is hereby granted, free of charge, to any person obtaining
+    a copy of this software and associated documentation files (the
+    "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the Software, and to
+    permit persons to whom the Software is furnished to do so, subject to
+    the following conditions:
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+}}}
+
+CONTENTS                                                         *hubr-contents*
+
+Introduction ........ |hubr-introduction|
+Unite Sources ....... |hubr-unite-sources|
+Unite Kinds ......... |hubr-unite-kinds|
+
+==============================================================================
+INTRODUCTION                                                 *hubr-introduction*
+
+*hubr* is a set of super simple GitHub tools for fun, productivity, and Vim
+
+
+==============================================================================
+UNITE SOURCES                                               *hubr-unite-sources*
+
+hubr provides some new "sources" for Unite.vim
+
+                                                    *hubr-unite-source-gh_issue*
+gh_issue    Nominates GitHub issues for the current repo as candidates.
+        Arguments can be provided in any order, and must be in the form
+        `key=val` or `key?`. The keys are exactly the arguments to be passed
+        to the `hubr#get_issues()` method. 
+        The `key=val` syntax is self-explanatory.
+        The `key?` syntax is used to indicate that hubr should look for the
+        value in the `hubrrc` file (which, as you may remember, can be placed
+        in the project root to override global settings).
+
+
+==============================================================================
+UNITE KINDS                                                   *hubr-unite-kinds*
+
+hubr provides some new "kinds" for Unite.vim
+
+                                                      *hubr-unite-kind-gh_issue*
+gh_issue    A kind for GitHub issues. 

@@ -64,6 +64,10 @@ def validated_data(fn):
 
     return wrapped
 
+def format_date(date):
+    """Format a Python datetime obj to github's date format"""
+    return date.isoformat() # convenient!
+
 class Http(object):
 
     """Http-layer for Github API calls"""
@@ -221,29 +225,38 @@ class Hubr(object):
     def get_issue(self, issue):
         return self._http.json(self._repo("issues/%s", issue))
 
-    def get_issues(self, state=None, tags=None, milestone=None, since=None):
-        """@todo: Docstring for get_issues.
+    def get_issues(self, **kwargs):
+        """Get a list of issues for the current repo. Accepts
+        kwargs to filter the results:
 
         :state: Either "closed" or "open"
-        :tags: List of tags to require
+        :labels: List of labels (tags) to require, or a String that's
+                 comma-separated
         :milestone: Id or name of a milestone; if a String, we will 
                     automatically query for the id
-        :since: A Date (FIXME: not implemented)
+        :since: A datetime
+        :assignee: String user of whom the issue is assigned to; 
+                    pass the string "none" for issues assigned to nobody
+        :creator: String user of who created the issue
         :returns: A list of issues, or None on error
 
         """
         params = {}
-        if state is not None:
-            params['state'] = state
-        if tags is not None:
-            params['labels'] = tags
-        if milestone is not None:
+        for key, val in kwargs.iteritems():
+            if val is not None:
+                params[key] = val
+
+        if params.has_key('milestone'):
+            milestone = params['milestone']
             if type(milestone) != int:
+                # make it an int
                 params['milestone'] = self.get_milestone_number(milestone)
-            else:
-                params['milestone'] = milestone
-        if since is not None:
-            params['since'] = since
+
+        if params.has_key('since') and type(params['since']) != str:
+            params['since'] = format_date(params['since'])
+
+        if params.has_key('labels') and type(params['labels']) == list:
+            params['labels'] = ','.join(params['labels'])
 
         return self._http.json(self._repo("issues", params))
 
@@ -302,6 +315,28 @@ class Hubr(object):
         """
         url = self._repo("issues/%s/labels/%s", issue, tagName)
         return self._http.delete(url)
+
+    def has_option(self, name):
+        """Mostly for the vim interface, but will 
+        check if the given option has been defined
+
+        :name: The option name. See #get_option
+        """
+        return self._options.has_key(name.upper())
+
+    def get_option(self, name):
+        """Get an option value
+
+        :name: The option name. It is converted to all 
+                caps for convenience
+        :returns: The value, or None if not set
+
+        """
+        name = name.upper()
+        if not self._options.has_key(name):
+            return None
+
+        return self._options[name]
 
     def set_option(self, name, value):
         """Manually set an option value
@@ -377,7 +412,7 @@ class Hubr(object):
                     if value[0] == value[-1] == '"':
                         value = value[1:-1]
 
-                    options[key.strip()] = value
+                    options[key.strip().upper()] = value
 
         http = Http(options['TOKEN'])
         hubr = Hubr(http)
@@ -392,6 +427,8 @@ def main(argv):
 
     """
     hubr = Hubr.from_config()
+
+    import datetime
 
     # print JSON.dumps(hubr.get_issue(2256), indent=4)
     print JSON.dumps(hubr.get_issues(state='open', milestone="2.10.0"), indent=4)

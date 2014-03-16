@@ -5,11 +5,29 @@ let s:unite_source = {
 
 function! s:unite_source.gather_candidates(args, context)
 
-    " FIXME milestone? maybe as an arg? state?
-    let issuesFilter = {
-        \ 'state': 'open',
-        \ 'milestone': '2.10.0'
-        \ }
+    let issuesFilter = {}
+    for arg in a:args
+        let lastChar = len(arg) - 1
+        let useOpt = arg[lastChar] == '?'
+        let eq = stridx(arg, '=')
+        if eq == -1 && useOpt
+            " hubrrc opt
+            let opt = strpart(arg, 0, lastChar)
+            let val = hubr#_pyopt(opt)
+            if hubr#_has_pyopt(opt) " safely handle un-set opt
+                let issuesFilter[opt] = val
+            endif
+        elseif eq != -1
+            " key=val
+            let key = strpart(arg, 0, eq)
+            let value = strpart(arg, eq+1)
+            let issuesFilter[key] = value
+        else
+            " notify error
+            call unite#print_error('invalid gh_issues arg ' . arg)
+        endif
+    endfor
+
     let issues = hubr#get_issues(issuesFilter)
 
     if type(issues) == type(0)
@@ -39,7 +57,10 @@ function! s:unite_source.gather_candidates(args, context)
         endif
 
         let maxLen = max([maxLen, len(element.word)])
-        let maxAssigneeLen = max([maxAssigneeLen, len(issue.assignee.login)])
+
+        if type(issue.assignee) != type(0)
+            let maxAssigneeLen = max([maxAssigneeLen, len(issue.assignee.login)])
+        endif
     endfor
 
     let desiredTitleLen = maxLen + 2
