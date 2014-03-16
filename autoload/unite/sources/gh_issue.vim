@@ -1,3 +1,10 @@
+" -------------------------------
+"  Github Issue Unite Source
+"  By: Daniel Leong
+" -------------------------------
+
+let s:save_cpo = &cpo
+set cpo&vim
 
 let s:unite_source = {
     \ 'name': 'gh_issue',
@@ -97,3 +104,6 @@ endfunction
 function! unite#sources#gh_issue#define()
     return s:unite_source
 endfunction
+
+let &cpo = s:save_cpo
+unlet s:save_cpo

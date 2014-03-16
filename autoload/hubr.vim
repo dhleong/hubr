@@ -110,6 +110,14 @@ function! hubr#assign(issue, userLogin)
         \ . '")')
 endfunction
 
+function! hubr#get_labels()
+    return s:python('get_labels()')
+endfunction
+
+function! hubr#get_issue(issue)
+    return s:python('get_issue(' . a:issue . ')')
+endfunction
+
 " Options is a dict whose keys match kwargs
 "  for the same method in the Python Hubr
 function! hubr#get_issues(options)

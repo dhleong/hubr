@@ -260,6 +260,9 @@ class Hubr(object):
 
         return self._http.json(self._repo("issues", params))
 
+    def get_labels(self):
+        return self._http.json(self._repo("labels"))
+
     def get_milestones(self):
         """Get milestones for the current repo"""
         return self._http.json(self._repo("milestones"))
@@ -430,8 +433,9 @@ def main(argv):
 
     import datetime
 
+    print JSON.dumps(hubr.get_labels(), indent=4)
     # print JSON.dumps(hubr.get_issue(2256), indent=4)
-    print JSON.dumps(hubr.get_issues(state='open', milestone="2.10.0"), indent=4)
+    # print JSON.dumps(hubr.get_issues(state='open', milestone="2.10.0"), indent=4)
     # result = hubr.tag(2256, "Not a bug")
     # print result.json()
     # print result.get_status()
