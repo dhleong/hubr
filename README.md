@@ -61,11 +61,16 @@ you quickly access and interact with issues in your Github repo.
 For example:
 
 ```vim
-nnoremap ghi :Unite gh_issue<cr>
+nnoremap ghi :Unite gh_issue:state=open:milestone?<cr>
 ```
 
 Will let you type `ghi` in normal mode to call up a Unite window
-that lists issues from GitHub. The default action uses `open` to
+that lists open issues from GitHub in the milestone specified in
+a `.hubrrc` (either the global one, or repo-local). See the
+[vim help file](https://github.com/dhleong/hubr/blob/master/doc/hubr.txt)
+(`:help hubr`) for more information.
+
+The default action uses `open` to
 open the issue in a browser; you can also use it from `git commit`
 to insert the `Refs` or `Closes` messages for one or more issues.
 
