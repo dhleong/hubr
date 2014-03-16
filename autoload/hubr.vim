@@ -1,3 +1,7 @@
+" ------------------------------------------------------------------------
+" Script-local utilities
+" ------------------------------------------------------------------------
+
 function! s:python(methodCall)
     let repo_path = hubr#repo_path()
     let fullCall = 'hubr("' . repo_path . '").' . a:methodCall
@@ -25,6 +29,20 @@ function! s:ensure_fugitive()
     endif
 
     return 1
+endfunction
+
+" ------------------------------------------------------------------------
+" Utility methods
+" ------------------------------------------------------------------------
+
+function! hubr#has_unite()
+    return exists("*unite#start")
+endfunction
+
+" Check if the current repo is actually for github
+function! hubr#is_github_repo()
+    let origin = fugitive#repo().config('remote.origin.url')
+    return stridx(origin, "github.com") != -1
 endfunction
 
 " Convenience to get the repo user's 'login' name
@@ -81,12 +99,9 @@ function! hubr#repo_name()
     return strpart(remote, start, end - start)
 endfunction
 
-function! hubr#_exec(cmd, args)
-    let path = expand("%:p")
-    let root = strpart(path, 0, stridx(path, 'autoload'))
-
-    return system(root . a:cmd . ' ' . a:args)
-endfunction
+" ------------------------------------------------------------------------
+" Hubr API methods
+" ------------------------------------------------------------------------
 
 " Options is a dict whose keys match kwargs
 "  for the same method in the Python Hubr
@@ -103,9 +118,18 @@ function! hubr#get_user(...)
     endif
 endfunction
 
+
 " ------------------------------------------------------------------------
 " 'Private' methods
 " ------------------------------------------------------------------------
+
+" @deprecated
+function! hubr#_exec(cmd, args)
+    let path = expand("%:p")
+    let root = strpart(path, 0, stridx(path, 'autoload'))
+
+    return system(root . a:cmd . ' ' . a:args)
+endfunction
 
 " Get value of an option
 function! hubr#_opt(optName)
@@ -139,7 +163,9 @@ endfunction
 " Options
 " ------------------------------------------------------------------------
 let s:opt_defaults = {
-    \ 'set_options_from_fugitive': 1
+    \ 'hubr_set_options_from_fugitive': 1,
+    \ 'hubr_auto_ref_issues_in_commit': 1,
+    \ 'hubr_auto_ref_issues_args': 'state=open:milestone?'
 \}
 
 " ------------------------------------------------------------------------

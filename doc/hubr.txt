@@ -24,18 +24,70 @@ License: MIT license  {{{
 
 CONTENTS                                                         *hubr-contents*
 
-Introduction ........ |hubr-introduction|
-Unite Sources ....... |hubr-unite-sources|
-Unite Kinds ......... |hubr-unite-kinds|
+Introduction ....................... |hubr-introduction|
+  Dependencies ..................... |hubr-dependencies|
+Options ............................ |hubr-options|
+  hubr_set_options_from_fugitive ... |g:hubr_set_options_from_fugitive|
+  hubr_auto_ref_issues_in_commit ... |g:hubr_auto_ref_issues_in_commit|
+  hubr_auto_ref_issues_args ........ |g:hubr_auto_ref_issues_args|
+Unite Sources ...................... |hubr-unite-sources|
+Unite Kinds ........................ |hubr-unite-kinds|
 
 ==============================================================================
-INTRODUCTION                                                 *hubr-introduction*
+Introduction                                                 *hubr-introduction*
 
 *hubr* is a set of super simple GitHub tools for fun, productivity, and Vim
 
+------------------------------------------------------------------------------
+Dependencies                                                 *hubr-dependencies*
+
+Required:
+    vim-fugitive: http://github.com/tpope/vim-fugitive
+
+Optional (but recommended for most features):
+    unite.vim: http://github.com/shougo/unite.vim
+
+
+===============================================================================
+Options                                                           *hubr-options*
+
+All hubr options can be defined globally in your vimrc with the `g:` prefix,
+or buffer-locally with the `b:` prefix.
+
+------------------------------------------------------------------------------
+*g:hubr_set_options_from_fugitive*
+
+Controls whether or not to use fugitive to set the "ME_LOGIN" and "REPO_NAME"
+Hubr options. If `1` (default), then the hubr API methods will automatically
+operate on whatever repo you currently happen to be in, according to fugitive.
+
+  let g:hubr_set_options_from_fugitive = 1
+
+------------------------------------------------------------------------------
+*g:hubr_auto_ref_issues_in_commit*
+
+Controls whether you can use the |hubr-unite-source-gh_issue| when editing a
+git commit to fill in "Refs" and "Closes" methods. If `1` (default), typing
+`refs#` or `closes#` on a line by itself will trigger the Unite window, with
+the default action inserting the refs for you.
+
+The args passed to Unite can be specified with |g:hubr_auto_ref_issues_args|
+
+  let g:hubr_auto_ref_issues_in_commit = 1
+
+------------------------------------------------------------------------------
+*g:hubr_auto_ref_issues_args*
+
+The arguments to pass to `Unite gh_issue` when performing the git commit
+auto-ref (see |g:hubr_auto_ref_issues_in_commit|). The default filters only open
+tickets, using the `.hubrrc`-configured milestone (if available). For more
+information on the formatting of these args, see |hubr-unite-source-gh_issue|
+
+  let g:hubr_auto_ref_issues_args = 'state=open:milestone?'
+
 
 ==============================================================================
-UNITE SOURCES                                               *hubr-unite-sources*
+Unite Sources                                               *hubr-unite-sources*
 
 hubr provides some new "sources" for Unite.vim
 
