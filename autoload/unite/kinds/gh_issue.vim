@@ -41,6 +41,34 @@ let s:kind = {
     \ }
 
 """""""""""""""""
+"  TAKE action  "
+"""""""""""""""""
+let s:kind.action_table.take = {
+    \ 'description' : 'Assign the issue to yourself; requires ME_LOGIN config, or hubr_set_options_from_fugitive enabled',
+    \ 'is_selectable': 0,
+    \ }
+function! s:kind.action_table.take.func(candidate)
+
+    let id = a:candidate.source__issue_id
+    " echomsg "View issue " . id
+
+    if !hubr#_has_pyopt("me_login")
+        echoerr "You must either enable hubr_set_options_from_fugitive, or set the ME_LOGIN config"
+        return
+    endif
+
+    let me = hubr#_pyopt("me_login")
+    let result = hubr#assign(id, me)
+    if result.status != 200
+        echoerr "Error: " . result.status
+        return
+    endif
+
+    echomsg "Successfully 'took' the issue"
+endfunction
+
+
+"""""""""""""""""
 "  VIEW action  "
 """""""""""""""""
 let s:kind.action_table.view = {

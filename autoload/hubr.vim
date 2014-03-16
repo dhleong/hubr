@@ -103,6 +103,13 @@ endfunction
 " Hubr API methods
 " ------------------------------------------------------------------------
 
+function! hubr#assign(issue, userLogin)
+    return s:python('assign("' . a:issue 
+        \ . '", "' 
+        \ . a:userLogin 
+        \ . '")')
+endfunction
+
 " Options is a dict whose keys match kwargs
 "  for the same method in the Python Hubr
 function! hubr#get_issues(options)
