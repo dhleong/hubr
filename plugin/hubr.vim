@@ -24,16 +24,10 @@ function! Hubr_GithubCommitRefInsert()
 
     " prepare the command...
     let command = 'Unite gh_issue:' . hubr#_opt('hubr_auto_ref_issues_args') 
-        \ . ' -start-insert'
         \ . ' -default-action=annotate_' . command 
 
     " ... and run it!
     exe command
-
-    " for some reason, start-insert adds some garbage to the input.
-    " this magical incantation seems to help (although I can't seem
-    " to get the prompt to show up correctly
-    norm cc
 endfunction
 
 augroup hubr_GithubCommit
