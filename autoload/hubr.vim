@@ -36,7 +36,8 @@ endfunction
 " ------------------------------------------------------------------------
 
 function! hubr#has_unite()
-    return exists("*unite#start")
+    " return exists("*unite#start")
+    return exists("g:loaded_unite")
 endfunction
 
 " Check if the current repo is actually for github

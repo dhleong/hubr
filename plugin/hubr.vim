@@ -29,6 +29,15 @@ function! Hubr_GithubCommitRefInsert()
 
     " ... and run it!
     exe command
+
+    " for some reason, start-insert adds some garbage to the input.
+    " this magical incantation seems to help
+    " stopinsert
+    " norm dd
+    " startinsert
+    "
+    " norm xx
+    norm cc
 endfunction
 
 augroup hubr_GithubCommit
