@@ -31,12 +31,8 @@ function! Hubr_GithubCommitRefInsert()
     exe command
 
     " for some reason, start-insert adds some garbage to the input.
-    " this magical incantation seems to help
-    " stopinsert
-    " norm dd
-    " startinsert
-    "
-    " norm xx
+    " this magical incantation seems to help (although I can't seem
+    " to get the prompt to show up correctly
     norm cc
 endfunction
 

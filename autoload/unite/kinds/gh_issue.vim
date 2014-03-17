@@ -67,6 +67,26 @@ function! s:kind.action_table.take.func(candidate)
     echomsg "Successfully 'took' the issue"
 endfunction
 
+""""""""""""""""""
+"  LABEL action  "
+""""""""""""""""""
+let s:kind.action_table.label = {
+    \ 'description' : 'Modify labels on the issue',
+    \ 'is_selectable': 0,
+    \ }
+function! s:kind.action_table.label.func(candidate)
+
+    let issue = a:candidate.source__issue_dict
+    let id = a:candidate.source__issue_id
+    " echomsg "View issue " . id
+
+    if !hubr#_has_pyopt("me_login")
+        echoerr "You must either enable hubr_set_options_from_fugitive, or set the ME_LOGIN config"
+        return
+    endif
+
+    call unite#start(['gh_label'], {'action__issue_dict': issue})
+endfunction
 
 """""""""""""""""
 "  VIEW action  "

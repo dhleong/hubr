@@ -92,7 +92,7 @@ function! s:unite_source.gather_candidates(args, context)
 
         " append labels 
         if len(issue.labels)
-            let labelNames = map(issue.labels, 'v:val.name')
+            let labelNames = map(copy(issue.labels), 'v:val.name')
             let element.word = element.word 
                 \ . '[' . join(labelNames, ', ') . ']'
         endif
