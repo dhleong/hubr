@@ -10,13 +10,30 @@ let s:unite_source = {
     \ 'name': 'gh_label',
     \ }
 
-function! s:map_labels(labels)
+function! s:map_labels(labels, existing)
+    " build up a lookup table
+    let names = {}
+    let selected = {}
+    let longest = 0
+    for label in a:labels
+        let names[label.name] = label.name
+        let selected[label.name] = 0
+        let longest = max([longest, len(label.name)])
+    endfor
+
+    " update name for those 
+    for label in a:existing
+        let spaces = repeat(' ', longest - len(label.name))
+        let names[label.name] = label.name . spaces . ' (SELECTED)'
+    endfor
+
     " TODO gh_label kind
     return map(a:labels, '{
-        \ "word": v:val.name,
+        \ "word": names[v:val.name],
         \ "source": "gh_label",
         \ "kind": "common",
-        \ "source__label_dict": v:val
+        \ "source__label_dict": v:val,
+        \ "source__label_selected": selected[v:val.name]
         \ }')
 endfunction
 
@@ -27,17 +44,17 @@ function! s:gather_issue_labels(issueNumber)
         return []
     endif
 
-    return s:map_labels(issue.labels)
+    return s:map_labels(issue.labels, issue.labels)
 endfunction
 
-function! s:gather_all_labels()
+function! s:gather_all_labels(existingLabels)
     let labels = hubr#get_labels()
     if type(labels) == type(0)
         " some kind of error
         return []
     endif
 
-    return s:map_labels(labels)
+    return s:map_labels(labels, a:existingLabels)
 endfunction
 
 function! s:unite_source.gather_candidates(args, context)
@@ -54,10 +71,10 @@ function! s:unite_source.gather_candidates(args, context)
         " TODO we actually need to get all the labels,
         "  and somehow add a way to toggle specific ones,
         "  using this list to know which ones we already have
-        return s:map_labels(issue.labels)
+        return s:gather_all_labels(issue.labels)
     else
         " no args; just get all labels for the repo
-        return s:gather_all_labels()
+        return s:gather_all_labels([])
     endif
 endfunction
 
