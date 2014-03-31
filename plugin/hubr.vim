@@ -1,3 +1,38 @@
+"
+" let s:hubr_omnicomplete_list = []
+"
+" function! HubrTestFunc()
+"     echo s:hubr_omnicomplete_list
+" endfunction
+"
+" command! HubrTest call HubrTestFunc()
+"
+" function! Hubr_InitIssues()
+"     if !hubr#is_github_repo()
+"         " nothing to do
+"         return
+"     endif
+"
+"     " start fetching
+"     let repo_path = hubr#repo_path()
+"     exe 'python prepare_omnicomplete("' . repo_path . '")'
+"
+"     " TODO prepare
+" endfunction
+"
+" augroup hubr_GithubCommit
+"     autocmd!
+"     autocmd BufEnter COMMIT_EDITMSG call Hubr_InitIssues()
+" augroup END
+"
+" " ------------------------------------------------------------------------
+" " Python initialization
+" " ------------------------------------------------------------------------
+"
+" let s:repo_path = hubr#repo_path()
+" let s:script_path = fnameescape(expand('<sfile>:p:h:h'))
+" execute 'pyfile '.s:script_path.'/hubr_vim.py'
+
 " ------------------------------------------------------------------------
 " Autocmds
 " ------------------------------------------------------------------------

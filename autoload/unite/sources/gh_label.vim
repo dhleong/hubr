@@ -11,6 +11,7 @@ let s:unite_source = {
     \ }
 
 function! s:map_labels(labels, existing)
+
     " build up a lookup table
     let names = {}
     let selected = {}

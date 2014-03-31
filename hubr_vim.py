@@ -1,6 +1,6 @@
 ''' ------------------------------------------------------------------------
 Python initialization
----------------------------------------------------------------------------
+----------------------------------------------------------------------------
 here we initialize the hubr stuff '''
 
 import vim
@@ -9,6 +9,8 @@ import json
 # update the system path, to include the hubr path
 import sys
 import os
+
+import threading
 
 # vim.command('echom expand("<sfile>:p:h:h")') # broken, <sfile> inside function
 # sys.path.insert(0, os.path.join(vim.eval('expand("<sfile>:p:h:h")'), 'hubr'))
@@ -123,3 +125,35 @@ def hubr_to_vim(bindName, result):
     d = vim.bindeval(bindName)
     vimified = _vimify(result)
     d['result'] = vimified
+
+class IssuesFetcher(threading.Thread):
+
+    """Fetches issues in the background"""
+
+    def __init__(self, hubr, listObj):
+        """Constructor
+
+        :hubr: @todo
+        :listObj: @todo
+
+        """
+        self._hubr = hubr
+        self._listObj = listObj
+
+        threading.Thread.__init__(self)
+
+    def run(self):
+        """Fetch the issues
+        :returns: @todo
+
+        """
+        # TODO options
+        issues = self._hubr.get_issues(state="open")
+        if issues:
+            issues = [i['title'] for i in issues]
+            self._listObj.extend(issues)
+
+def prepare_omnicomplete(repoPath):
+
+    listObj = vim.bindeval("s:hubr_omnicomplete_list")
+    IssuesFetcher(hubr(repoPath), listObj).start()
