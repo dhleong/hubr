@@ -1,127 +1,47 @@
-#!/bin/bash
+#!/usr/bin/env python
 
-# issues config
-MILESTONE=""
-STATE=closed
+import sys, getopt
+from hubr import Hubr
 
-#
-# imports
-#
+def usage():
+    print "usage: github-issues-fetch -m <milestone-name> (-d <since_date>) (-l <labels>)"
+    print "flags: -o OPEN tickets"
+    print "       -c CLOSED tickets (default)"
+    sys.exit()
 
-SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
-  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-  SOURCE="$(readlink "$SOURCE")"
-  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
-done
-DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+# query options
+opts = {'state':'closed'}
 
-source ${DIR}/gh-cmd
+try:
+    optlist, args = getopt.getopt(sys.argv[1:], ":d:hl:m:co")
+except getopt.GetoptError, e:
+    print str(e)
+    usage()
+    sys.exit(2)
 
-#
-# Methods
-#
+# parse args list
+for o, a in optlist:
+    if o == '-l':
+        opts['labels'] = a
+    elif o == '-d':
+        opts['since'] = a
+    elif o == '-c':
+        opts['state'] = 'closed'
+    elif o == '-o':
+        opts['state'] = 'open'
+    elif o == '-m':
+        opts['milestone'] = a
+    elif o == '-h':
+        usage()
+        sys.exit()
 
-get_milestone() {
-    # get the number for a given milestone
-    #
-    # @param NAME name of the milestone
-    # @return -1 if not found, else the number
-    #
+# load an configure hubr instance
+hubr = Hubr.from_config('./.hubrrc')
+if not opts.has_key('milestone') and hubr.has_option('milestone'):
+    opts['milestone'] = hubr.get_option('milestone')
 
-    NAME=$1
-
-    AWK='BEGIN{milestone="-1"}'                           # initialize
-    AWK+='/number/{gsub(/[ ,:]/, "", $3); lastNumber=$3}' # number is always first; save it
-    AWK+='/"'${NAME}'"/{milestone=lastNumber; exit}'      # if the line matches "MILESTONE", save number
-    AWK+='END{print milestone}'                           # print the number
-
-    # fetch, and feed to our nice script
-    gh_get "${REPO}/milestones" | awk -F\" "$AWK" 
-}
-
-get_issues() {
-    # get json of issues for a given milestone and state
-    #
-    # @param MILENUM milestone number; can be fetched via get_milestone()
-    # @param STATE "open" or "closed"
-    # @param SINCE (optional) date
-    #
-
-    MILENUM=$1
-    STATE=$2
-    SINCE=$3
-    LABELS=$4
-
-    sinceParam=""
-    if [ z != z$SINCE ]
-    then
-        sinceParam="&since=$SINCE"
-    fi
-
-    labelsParam=""
-    if [ z != z$LABELS ]
-    then
-        labelsParam="&labels=${LABELS}"
-    fi
-
-    gh_get "${REPO}/issues?state=${STATE}&milestone=${MILENUM}${sinceParam}${labelsParam}"
-}
-
-_debug() {
-    echo "$@" 1>&2
-}
-
-print_usage() {
-    echo "usage: github-issues-fetch -m <milestone-name> (-d <since_date>) (-l <labels>) (-r <repo_name>)"
-    echo "flags: -o OPEN tickets"
-    echo "       -c CLOSED tickets (default)"
-    exit
-}
-
-#
-# Script
-#
-
-while getopts ":d:hl:m:r:co" Option
-do
-  case $Option in
-  r) REPO="repos/$OPTARG";;
-  d) SINCE="$OPTARG";;
-  l) LABELS="$OPTARG";;
-  m) MILESTONE="$OPTARG";;
-  h) print_usage;;
-
-  c) STATE="closed";;
-  o) STATE="open";;
-  esac
-done
-
-# fetch the milestone
-_debug "Fetching milestone '${MILESTONE}'..."
-mileNum=$(get_milestone ${MILESTONE})
-
-if [ $mileNum -eq -1 ]
-then
-    _debug "No such milestone \`\`${MILESTONE}''"
-    exit 1
-fi
-
-sinceLabel=""
-if [ z != z$SINCE ]
-then
-    sinceLabel=" since $SINCE"
-fi
-
-_debug "done; Fetching ${STATE} issues${sinceLabel}..." 
-_debug ''
-
-AWK='/number/{gsub(/[ ,:]/, "", $3); lastNumber=$3}' # number is always first; save it
-AWK+='/title/{gsub(/^.*"title": "|",$/, ""); print lastNumber ": " $0}' # clean up and print title with issue number
-
-    #| sed 's/.*"title": "\(.*\)",/\1/' \
-get_issues "$mileNum" "$STATE" "$SINCE" "$LABELS"\
-    | awk -F\" "$AWK" \
-    | grep -v ": ${MILESTONE}$" \
-    | sed 's/\\"/"/g'
-
+# fetch issues
+issues = hubr.get_issues(**opts)
+if issues and len(issues):
+    for i in issues:
+        print '%d: %s' % (i["number"], i["title"])
