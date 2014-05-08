@@ -79,7 +79,7 @@ function! s:unite_source.gather_candidates(args, context)
 
     let issue = get(a:context, 'action__issue_dict', {})
     if !hubr#_has_pyopt('repo_name')
-        echoerr "You must either use hubr_set_options_from_fugitive, or set REPO_NAME"
+        echoerr "You must either use hubr#set_options_from_fugitive, or set REPO_NAME"
         return []
     elseif len(a:args) > 0
         " the arg is an issue number

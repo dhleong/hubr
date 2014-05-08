@@ -4,7 +4,7 @@
 function! Hubr_GithubCommitRefInsert()
     if !(hubr#is_github_repo() 
             \ && hubr#has_unite()
-            \ && hubr#_opt('hubr_auto_ref_issues_in_commit'))
+            \ && hubr#_opt('auto_ref_issues_in_commit'))
         return
     endif
 
@@ -23,7 +23,7 @@ function! Hubr_GithubCommitRefInsert()
     norm ddk
 
     " prepare the command...
-    let command = 'Unite gh_issue:' . hubr#_opt('hubr_auto_ref_issues_args') 
+    let command = 'Unite gh_issue:' . hubr#_opt('auto_ref_issues_args') 
         \ . ' -default-action=annotate_' . command 
 
     " ... and run it!

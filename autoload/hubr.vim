@@ -179,9 +179,9 @@ endfunction
 " Options
 " ------------------------------------------------------------------------
 let s:opt_defaults = {
-    \ 'hubr_set_options_from_fugitive': 1,
-    \ 'hubr_auto_ref_issues_in_commit': 1,
-    \ 'hubr_auto_ref_issues_args': 'state=open:milestone?'
+    \ 'set_options_from_fugitive': 1,
+    \ 'auto_ref_issues_in_commit': 1,
+    \ 'auto_ref_issues_args': 'state=open:milestone?'
 \}
 
 " ------------------------------------------------------------------------

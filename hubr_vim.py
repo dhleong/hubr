@@ -79,7 +79,7 @@ def hubr(repoPath):
         return __hubrs[repoPath]
 
     newHubr = Hubr.from_config(repoPath + '.hubrrc')
-    if vimopt('hubr_set_options_from_fugitive'):
+    if vimopt('set_options_from_fugitive'):
         newHubr.set_option('REPO_NAME', vimcall('repo_name'))
         newHubr.set_option('ME_LOGIN', vimcall('me_login'))
 

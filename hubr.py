@@ -31,6 +31,9 @@ class HubrResult(object):
 
         else:
             return self._error.code
+
+    def get_response(self):
+        return self._requestResult
         
     def json(self):
         """Get the json response
@@ -202,6 +205,19 @@ class Hubr(object):
         """
         self._http = http
         self._options = {}
+
+    def _format_milestone(self, params):
+        """Format the milestone in a params dict
+
+        :params: a dict potentially containing "milestone"
+
+        """
+        if params.has_key('milestone'):
+            milestone = params['milestone']
+            if type(milestone) != int:
+                # make it an int
+                params['milestone'] = self.get_milestone_number(milestone)
+
         
     def http(self):
         """Get the Http instance for manual calls
@@ -221,6 +237,28 @@ class Hubr(object):
 
         url = self._repo("issues/%s", issue)
         return self._http.patch(url, json={'assignee': userLogin})
+
+    def create_issue(self, title, **kwargs):
+        """File a new issue for the current repo.
+
+        :title: String (required)
+        :body: String
+        :assignee: String user of whom the issue is assigned to; 
+                    pass the string "none" for issues assigned to nobody
+        :milestone: Id or name of a milestone; if a String, we will 
+                    automatically query for the id
+        :returns: a HubrResult
+
+        """
+        url = self._repo("issues")
+        params = {'title': title}
+        for key, val in kwargs.iteritems():
+            if val is not None:
+                params[key] = val
+    
+        self._format_milestone(params)
+
+        return self._http.post(url, json=params)
 
     def get_issue(self, issue):
         return self._http.json(self._repo("issues/%s", issue))
@@ -246,11 +284,7 @@ class Hubr(object):
             if val is not None:
                 params[key] = val
 
-        if params.has_key('milestone'):
-            milestone = params['milestone']
-            if type(milestone) != int:
-                # make it an int
-                params['milestone'] = self.get_milestone_number(milestone)
+        self._format_milestone(params)
 
         if params.has_key('since') and type(params['since']) != str:
             params['since'] = format_date(params['since'])
