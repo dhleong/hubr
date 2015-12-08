@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from os.path import expanduser, isfile
+from os.path import expanduser, isfile, getsize
 from urllib import urlencode, quote_plus
 import urllib2
 import json as JSON
@@ -32,6 +32,17 @@ class HubrResult(object):
         else:
             return self._error.code
 
+    def get_reason(self):
+        """
+        :returns: The status reason
+
+        """
+        if self._requestResult:
+            return self._requestResult.getcode() # umm...
+
+        else:
+            return self._error.reason
+
     def get_response(self):
         return self._requestResult
         
@@ -46,15 +57,23 @@ class HubrResult(object):
 
         return None
 
+    def __str__(self):
+        if not self._error:
+            return object.__str__(self)
+
+        status = "%d %s" % (self.get_status(), self.get_reason())
+        return status + self._error.read()
+
 
 def validated_data(fn):
     """Decorate a method that takes data"""
-    def wrapped(self, url, params=None, json=None):
+    def wrapped(self, url, params=None, body=None, headers=None, json=None):
         hasParams = params is not None
         hasJson = json is not None
+        hasBody = body is not None
 
-        if not (hasParams or hasJson):
-            raise Exception("You must provide either params or json")
+        if not (hasBody or hasParams or hasJson):
+            raise Exception("You must provide one of params, json, or body")
 
         elif hasParams and hasJson:
             raise Exception("You cannot provide BOTH params AND json!")
@@ -63,7 +82,7 @@ def validated_data(fn):
             # format it
             json = JSON.dumps(json)
 
-        return fn(self, url, params, json)
+        return fn(self, url, params, body, headers, json)
 
     return wrapped
 
@@ -104,7 +123,7 @@ class Http(object):
         return self._request("GET", url)
 
     @validated_data
-    def patch(self, url, params=None, json=None):
+    def patch(self, url, params=None, body=None, headers=None, json=None):
         """PATCH some data to the URL. Use the kwars
         params or json for whichever kind of data you
         need to send, but providing both, or not
@@ -116,10 +135,11 @@ class Http(object):
 
         """
 
-        return self._request("PATCH", url, params, json)
+        data = json or body
+        return self._request("PATCH", url, params, data)
 
     @validated_data
-    def post(self, url, params=None, json=None):
+    def post(self, url, params=None, body=None, headers=None, json=None):
         """POST some data to the URL. Use the kwars
         params or json for whichever kind of data you
         need to send, but providing both, or not
@@ -131,10 +151,11 @@ class Http(object):
 
         """
 
-        return self._request("POST", url, params, json)
+        data = json or body
+        return self._request("POST", url, params, data, headers=headers)
 
     @validated_data
-    def put(self, url, params=None, json=None):
+    def put(self, url, params=None, body=None, headers=None, json=None):
         """PUT some data to the URL. Use the kwars
         params or json for whichever kind of data you
         need to send, but providing both, or not
@@ -158,7 +179,7 @@ class Http(object):
         """
         return self.get(url).json()
         
-    def _request(self, method, url, params=None, body=None):
+    def _request(self, method, url, params=None, body=None, headers=None):
         """Prepare a request, optionally with params or body.
         Throws an HTTPError ONLY on 401
 
@@ -177,14 +198,27 @@ class Http(object):
         else:
             data = None
 
-        headers = {
-            "Authorization": "token %s" % self._token
-        }
+        authHeader = "token %s" % self._token
+        if not headers:
+            headers = {
+                "Authorization": authHeader
+            }
+        else:
+            headers['Authorization'] = authHeader
 
-        fullUrl = BASE_URL + url
+        if method == 'POST' and body:
+            if type(body) == file:
+                headers['Content-Length'] = getsize(body.name)
+            else:
+                headers['Content-Length'] = len(data)
+
+        if url.startswith('http'):
+            fullUrl = url
+        else:
+            fullUrl = BASE_URL + url
+
         req = urllib2.Request(fullUrl, data, headers)
         req.get_method = lambda: method # hax to support PUT
-
         try:
             return HubrResult(self._opener.open(req))
         except urllib2.HTTPError, e:
@@ -331,6 +365,52 @@ class Hubr(object):
 
         return self._http.json('user')
 
+    def get_releases(self):
+        """Fetch the releases for the current repo"""
+        url = self._repo('releases')
+        return self._http.json(url)
+
+    def edit_release(self, releaseId, data):
+        """Edit an existing release for the current repo"""
+        url = self._repo('releases/%s', releaseId)
+        return self._http.patch(url, json=data)
+
+    def create_release(self, data):
+        """Create a new release for the current repo"""
+        url = self._repo('releases')
+        return self._http.post(url, json=data)
+
+    def get_release_assets(self, releaseId):
+        url = self._repo('releases/%s/assets', releaseId)
+        return self._http.json(url)
+
+    def delete_release_asset(self, assetId):
+        url = self._repo('releases/assets/%s', assetId)
+        return self._http.delete(url)
+
+    def upload_release_asset(self, release, 
+            contentType, assetName, assetData, label=None):
+        if type(release) != dict:
+            raise Exception("`release` must be a dict")
+        if not (release['id'] and release['upload_url']):
+            raise Exception("`release` must have [id] and [upload_url]")
+
+        params = {'name': assetName}
+        if label:
+            params['label'] = label
+
+        # if type(assetData) == file:
+        #     if assetData.mode[-1] != 'b':
+        #         raise Exception("Files must be passed in binary read mode");
+        #     assetData = assetData.read()
+
+        rawUrl = release['upload_url']
+        url = rawUrl[0:rawUrl.find('{')]
+        url += '?' + urlencode(params)
+        return self._http.post(url, 
+                body=assetData,
+                headers={'Content-Type': contentType})
+
     def tag(self, issue, tagName):
         """Add a tag/label to an issue
 
@@ -454,6 +534,14 @@ class Hubr(object):
         http = Http(options['TOKEN'])
         hubr = Hubr(http)
         hubr._options = options
+        return hubr
+
+    @staticmethod
+    def create(token, repoName=None):
+        http = Http(token)
+        hubr = Hubr(http)
+        if repoName:
+            hubr.set_option("REPO_NAME", repoName);
         return hubr
 
 def main(argv):
