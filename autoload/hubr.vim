@@ -119,6 +119,29 @@ function! hubr#get_issue(issue)
     return s:python('get_issue(' . a:issue . ')')
 endfunction
 
+function! hubr#assign(issue, userLogin)
+    return s:python('assign("' . a:issue 
+        \ . '", "' 
+        \ . a:userLogin 
+        \ . '")')
+endfunction
+
+function! hubr#tag(issue, label)
+    return s:python('tag("' . a:issue 
+        \ . '", "' 
+        \ . a:label
+        \ . '")')
+endfunction
+
+function! hubr#untag(issue, label)
+    return s:python('untag("' . a:issue 
+        \ . '", "' 
+        \ . a:label
+        \ . '")')
+endfunction
+
+
+
 " Options is a dict whose keys match kwargs
 "  for the same method in the Python Hubr
 function! hubr#get_issues(options)
