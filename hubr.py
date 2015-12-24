@@ -260,6 +260,10 @@ class Hubr(object):
         """
         return self._http
 
+    def get_collaborators(self):
+        url = self._repo("collaborators")
+        return self._http.json(url)
+
     def assign(self, issue, userLogin):
         """Assign the given issue number to the given user
 

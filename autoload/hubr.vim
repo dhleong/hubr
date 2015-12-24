@@ -104,6 +104,10 @@ endfunction
 " Hubr API methods
 " ------------------------------------------------------------------------
 
+function! hubr#get_collaborators()
+    return s:python('get_collaborators()')
+endfunction
+
 function! hubr#assign(issue, userLogin)
     return s:python('assign("' . a:issue 
         \ . '", "' 
