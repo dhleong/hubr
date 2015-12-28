@@ -88,7 +88,7 @@ def hubr(repoPath):
 
 def _vimify(obj):
     """Convert a dict, list, etc. into a vim-consumable format"""
-    if type(obj) == dict:
+    if isinstance(obj, dict):
         d = vim.bindeval("{}")
         for key, val in obj.iteritems():
             key = str(key)
@@ -99,7 +99,7 @@ def _vimify(obj):
                 raise e
         return d
 
-    elif type(obj) == list:
+    elif isinstance(obj, list):
         l = vim.bindeval("[]")
         l.extend(map(_vimify, obj))
         return l
@@ -108,6 +108,11 @@ def _vimify(obj):
         return PythonToVimStr(obj)
 
     elif obj is None:
+        return 0
+
+    elif obj == True:
+        return 1
+    elif obj == False:
         return 0
     
     return obj
@@ -119,6 +124,7 @@ def hubr_to_vim(bindName, result):
     if type(result) == HubrResult:
         result = {
             'status': result.get_status(),
+            'next': result.next(),
             'json': result.json()
         }
 

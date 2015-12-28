@@ -444,7 +444,7 @@ class Hubr(object):
 
     def upload_release_asset(self, release, 
             contentType, assetName, assetData, label=None):
-        if type(release) != dict:
+        if not isinstance(release, dict):
             raise Exception("`release` must be a dict")
         if not (release['id'] and release['upload_url']):
             raise Exception("`release` must have [id] and [upload_url]")
