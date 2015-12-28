@@ -70,11 +70,12 @@ class HubrResult(object):
                 a HubrResult that follows the link
 
         """
-        links = self._info['link'].split(', ')
-        for l in links:
-            if l.endswith('rel="next"'):
-                end = l.find('>')
-                return l[1:end]
+        if self._info.has_key('link'):
+            links = self._info['link'].split(', ')
+            for l in links:
+                if l.endswith('rel="next"'):
+                    end = l.find('>')
+                    return l[1:end]
         return None
         
     def json(self):
