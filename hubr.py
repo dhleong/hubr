@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
-from os.path import expanduser, isfile, getsize
+import os
+from os.path import expanduser, isfile, getsize, dirname
 from urllib import urlencode, quote_plus
 import urllib2
 import json as JSON
+import re
 
 BASE_URL = "https://api.github.com/"
 DEFAULT_HUBRRC = '~/.hubrrc'
@@ -566,6 +568,16 @@ class Hubr(object):
 
         options = {}
         for path in configFilePaths:
+            # do this FIRST, in case they have a single,
+            # global .hubrrc with the token, and want us
+            # to just figure out the repo_name from git
+            thedir = dirname(path)
+            gitconfig = os.path.join(thedir, '.git', 'config')
+            if isfile(gitconfig):
+                repoName = _extractRepoName(gitconfig)
+                if repoName is not None:
+                    options['REPO_NAME'] = repoName
+
             if not isfile(path):
                 continue
 
@@ -597,6 +609,17 @@ class Hubr(object):
         if repoName:
             hubr.set_option("REPO_NAME", repoName);
         return hubr
+
+def _extractRepoName(gitconfig):
+    matcher = re.compile("url.*=.*git@github.com:(.*)\.git")
+    with open(gitconfig) as fp:
+        for line in fp:
+            matches = matcher.findall(line)
+            if len(matches) > 0:
+                return matches[0]
+
+    return None
+
 
 def main(argv):
     """cli interface to hubr
