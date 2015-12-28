@@ -298,6 +298,13 @@ class Hubr(object):
 
         return self._http.post(url, json=params)
 
+    def get_comments(self, issue):
+        """Get comments for an issue
+        TODO: support pagination
+        """
+        url = self._repo("issues/%s/comments", issue)
+        return self._http.json(url)
+
     def get_issue(self, issue):
         return self._http.json(self._repo("issues/%s", issue))
 
