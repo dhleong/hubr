@@ -8,6 +8,22 @@ import json as JSON
 BASE_URL = "https://api.github.com/"
 DEFAULT_HUBRRC = '~/.hubrrc'
 
+class HubrList(list):
+    def __init__(self, thelist, result):
+        super(HubrList, self).__init__(thelist)
+        self.result = result
+
+    def next(self):
+        return self.result.next()
+
+class HubrDict(dict):
+    def __init__(self, thedict, result):
+        super(HubrDict, self).__init__(thedict)
+        self.result = result
+
+    def next(self):
+        return self.result.next()
+
 class HubrResult(object):
 
     """Simple API Result wrapper for Hubr"""
@@ -20,6 +36,7 @@ class HubrResult(object):
         """
         self._requestResult = requestResult
         self._error = error
+        self._info = requestResult.info()
 
     def get_status(self):
         """
@@ -45,15 +62,36 @@ class HubrResult(object):
 
     def get_response(self):
         return self._requestResult
+
+    def next(self):
+        """
+        :returns: The `next` link URL, if any; else, None.
+                You may pass this to Hubr#follow() to get
+                a HubrResult that follows the link
+
+        """
+        links = self._info['link'].split(', ')
+        for l in links:
+            if l.endswith('rel="next"'):
+                end = l.find('>')
+                return l[1:end]
+        return None
         
     def json(self):
         """Get the json response
-        :returns: a dict of the JSON response,
-            or None if the API call failed
+        :returns: a dict (or list) of the JSON response,
+            or None if the API call failed. If an object
+            is returned, it will have an additional method
+            `next()` which returns the same as `next()` on
+            this Result object.
 
         """
         if self._requestResult:
-            return JSON.loads(self._requestResult.read())
+            json = JSON.loads(self._requestResult.read())
+            if type(json) == list:
+                return HubrList(json, self)
+            else:
+                return HubrDict(json, self)
 
         return None
 
@@ -259,6 +297,10 @@ class Hubr(object):
 
         """
         return self._http
+
+    def follow(self, nextLink):
+        """Follow a next() link"""
+        return self._http.get(nextLink)
 
     def get_collaborators(self):
         url = self._repo("collaborators")
