@@ -392,10 +392,11 @@ class Hubr(object):
         return self._http.json(self._repo("milestones"))
 
     def get_milestone_number(self, name):
-        """Get the number of a milestone by its name
+        """Get the number of a milestone 
+        (for API calls) by its name
 
-        :name: @todo
-        :returns: @todo
+        :name: The name (title) of the milestone
+        :returns: The number of the milestone
 
         """
         milestones = self.get_milestones()

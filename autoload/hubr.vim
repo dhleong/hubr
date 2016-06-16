@@ -123,6 +123,22 @@ function! hubr#get_issue(issue)
     return s:python('get_issue(' . a:issue . ')')
 endfunction
 
+" Options is a dict whose keys match kwargs
+"  for the same method in the Python Hubr
+function! hubr#get_issues(options)
+    let args = s:kwargs(a:options)
+    return s:python('get_issues(' . args . ')')
+endfunction
+
+
+function! hubr#get_milestones()
+    return s:python('get_milestones()')
+endfunction
+
+function! hubr#get_milestone_number(name)
+    return s:python('get_milestone_number(' . a:name . ')')
+endfunction
+
 function! hubr#assign(issue, userLogin)
     return s:python('assign("' . a:issue 
         \ . '", "' 
@@ -142,15 +158,6 @@ function! hubr#untag(issue, label)
         \ . '", "' 
         \ . a:label
         \ . '")')
-endfunction
-
-
-
-" Options is a dict whose keys match kwargs
-"  for the same method in the Python Hubr
-function! hubr#get_issues(options)
-    let args = s:kwargs(a:options)
-    return s:python('get_issues(' . args . ')')
 endfunction
 
 function! hubr#get_user(...)
