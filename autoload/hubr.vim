@@ -50,17 +50,24 @@ endfunction
 "  (for conveniences like assigning a ticket to yourself)
 function! hubr#me_login()
 
-    if !s:ensure_fugitive()
-        return 0
+    if hubr#_has_pyopt('ME_LOGIN')
+        return hubr#_pyopt('ME_LOGIN')
     endif
 
-    let fullUser = fugitive#repo().user()
-    let space = stridx(fullUser, ' ')
-    if space == -1
-        return fullUser
-    endif
+    return 0
 
-    return strpart(fullUser, 0, space)
+    " FIXME: this isn't actually reliable
+    " if !s:ensure_fugitive()
+    "     return 0
+    " endif
+    "
+    " let fullUser = fugitive#repo().user()
+    " let space = stridx(fullUser, ' ')
+    " if space == -1
+    "     return fullUser
+    " endif
+    "
+    " return strpart(fullUser, 0, space)
 endfunction
 
 

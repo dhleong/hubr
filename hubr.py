@@ -38,7 +38,9 @@ class HubrResult(object):
         """
         self._requestResult = requestResult
         self._error = error
-        self._info = requestResult.info()
+        self._info = None
+        if requestResult is not None:
+            self._info = requestResult.info()
 
     def get_status(self):
         """
@@ -266,6 +268,8 @@ class Http(object):
             if e.getcode() == 401:
                 raise e
 
+            elif e.getcode() == 422:
+                raise Exception(e.read())
             return HubrResult(None, e)
 
 class Hubr(object):
