@@ -42,8 +42,21 @@ endfunction
 
 " Check if the current repo is actually for github
 function! hubr#is_github_repo()
+    let cached = get(b:, 'hubr_is_github_repo', '')
+    if cached != ''
+        " the below call is a bit slow, so we cache
+        " it per-buffer so insert mode doesn't implode
+        return cached == 'yes'
+    endif
+
     let origin = fugitive#repo().config('remote.origin.url')
-    return stridx(origin, "github.com") != -1
+    if stridx(origin, "github.com") != -1
+        let b:hubr_is_github_repo = 'yes'
+        return 1
+    else
+        let b:hubr_is_github_repo = 'no'
+        return 0
+    endif
 endfunction
 
 " Convenience to get the repo user's 'login' name

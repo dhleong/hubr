@@ -2,7 +2,7 @@
 " Autocmds
 " ------------------------------------------------------------------------
 function! Hubr_GithubCommitRefInsert()
-    if !(hubr#is_github_repo() 
+    if !(hubr#is_github_repo()
             \ && hubr#has_unite()
             \ && hubr#_opt('auto_ref_issues_in_commit'))
         return
